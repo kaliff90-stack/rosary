@@ -1,0 +1,28 @@
+{
+  "name": "묵주기도",
+  "short_name": "묵주기도",
+  "description": "요일별 신비 안내, 기도문 전문, 진행 단계 추적과 한 단씩 자동 진행을 돕는 가톨릭 묵주기도 앱",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a1733",
+  "theme_color": "#1a1733",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "education"],
+  "prefer_related_applications": false
+}

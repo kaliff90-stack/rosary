@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1a1733">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="묵주기도">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>묵주기도</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1a1733;
+    --bg2:#241f47;
+    --card:#2c2752;
+    --card2:#332d60;
+    --gold:#e3c178;
+    --gold-soft:#cdae6f;
+    --text:#f3eede;
+    --muted:#b3acc9;
+    --line:rgba(255,255,255,.10);
+    --joy:#f2b84b;     /* 환희 */
+    --sorrow:#d36a6a;  /* 고통 */
+    --glory:#7aa6e8;   /* 영광 */
+    --light:#62c6a8;   /* 빛 */
+    --safe-top:env(safe-area-inset-top,0px);
+    --safe-bot:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:'Noto Sans KR',sans-serif;
+    background:radial-gradient(140% 100% at 50% 0%,#2a2454 0%,var(--bg) 55%,#13112a 100%);
+    color:var(--text);
+    min-height:100dvh;
+    overflow-x:hidden;
+  }
+  .wrap{max-width:760px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;}
+  .serif{font-family:'Nanum Myeongjo',serif;}
+
+  /* ===== Header ===== */
+  header{
+    padding:calc(var(--safe-top) + 18px) 20px 14px;
+    text-align:center;
+  }
+  header .cross{font-size:26px;color:var(--gold);}
+  header h1{font-family:'Nanum Myeongjo',serif;font-size:25px;font-weight:800;margin:6px 0 2px;letter-spacing:.04em;}
+  header .date{font-size:13px;color:var(--muted);}
+
+  /* ===== Home ===== */
+  #home{flex:1;padding:0 20px calc(28px + var(--safe-bot));display:flex;flex-direction:column;gap:16px;}
+  .today-card{
+    background:linear-gradient(160deg,var(--card2),var(--card));
+    border:1px solid var(--line);border-radius:22px;padding:22px 20px;
+    box-shadow:0 14px 40px rgba(0,0,0,.35);
+  }
+  .today-label{font-size:12px;color:var(--muted);letter-spacing:.1em;}
+  .myst-name{font-family:'Nanum Myeongjo',serif;font-size:30px;font-weight:800;margin:7px 0 3px;}
+  .myst-name .dot{display:inline-block;width:13px;height:13px;border-radius:50%;margin-right:9px;vertical-align:middle;}
+  .myst-when{font-size:13px;color:var(--gold-soft);}
+  .myst-list{list-style:none;margin:16px 0 0;padding:16px 0 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:11px;}
+  .myst-list li{display:flex;gap:12px;align-items:flex-start;font-size:14.5px;line-height:1.45;}
+  .myst-list .num{flex:none;width:23px;height:23px;border-radius:50%;background:rgba(227,193,120,.16);color:var(--gold);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+
+  .picker{display:flex;gap:8px;}
+  .picker button{
+    flex:1;background:var(--card);border:1px solid var(--line);color:var(--muted);
+    border-radius:14px;padding:11px 4px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;
+    transition:.15s;display:flex;flex-direction:column;align-items:center;gap:6px;
+  }
+  .picker button .sw{width:11px;height:11px;border-radius:50%;}
+  .picker button.active{background:var(--card2);border-color:var(--gold);color:var(--text);}
+  .picker button small{font-size:10px;opacity:.7;font-weight:500;}
+
+  .start-btn{
+    margin-top:auto;background:linear-gradient(135deg,var(--gold),#caa256);color:#2a2014;
+    border:none;border-radius:18px;padding:18px;font-size:18px;font-weight:800;font-family:'Nanum Myeongjo',serif;
+    cursor:pointer;box-shadow:0 12px 30px rgba(227,193,120,.28);letter-spacing:.05em;
+  }
+  .start-btn:active{transform:translateY(1px);}
+  .resume-bar{
+    background:rgba(227,193,120,.10);border:1px solid rgba(227,193,120,.35);border-radius:14px;
+    padding:13px 16px;display:none;align-items:center;justify-content:space-between;gap:10px;font-size:13.5px;
+  }
+  .resume-bar.show{display:flex;}
+  .resume-bar button{background:var(--gold);color:#2a2014;border:none;border-radius:10px;padding:8px 14px;font-weight:700;font-family:inherit;cursor:pointer;font-size:13px;}
+
+  /* ===== Prayer screen ===== */
+  #pray{flex:1;display:none;flex-direction:column;min-height:100dvh;}
+  #pray.show{display:flex;}
+  .topbar{
+    padding:calc(var(--safe-top) + 12px) 16px 12px;display:flex;align-items:center;gap:12px;
+    border-bottom:1px solid var(--line);
+  }
+  .iconbtn{background:var(--card);border:1px solid var(--line);color:var(--text);width:40px;height:40px;border-radius:12px;font-size:17px;cursor:pointer;flex:none;display:flex;align-items:center;justify-content:center;}
+  .topbar .info{flex:1;min-width:0;}
+  .topbar .info .m{font-size:12px;color:var(--gold-soft);font-weight:600;}
+  .topbar .info .s{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+  /* 진행 막대 (전체 진행도, 한 방향으로 매끄럽게) */
+  .decades{display:flex;padding:12px 16px 4px;}
+  .decades .d{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.10);overflow:hidden;}
+  .decades .d span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold-soft),var(--gold));transition:width .5s cubic-bezier(.33,1,.68,1);}
+
+  /* beads */
+  .beads{display:flex;justify-content:center;flex-wrap:wrap;gap:9px;padding:18px 16px 6px;min-height:30px;}
+  .beads .b{width:13px;height:13px;border-radius:50%;background:rgba(255,255,255,.14);transition:.2s;}
+  .beads .b.done{background:var(--gold-soft);}
+  .beads .b.cur{background:var(--gold);transform:scale(1.35);box-shadow:0 0 0 4px rgba(227,193,120,.22);animation:beadPulse 1.8s ease-in-out infinite;}
+  @keyframes beadPulse{0%,100%{box-shadow:0 0 0 4px rgba(227,193,120,.22);}50%{box-shadow:0 0 0 8px rgba(227,193,120,.07);}}
+
+  /* ===== 시각적 묵주 ===== */
+  .rosary-wrap{display:flex;justify-content:center;align-items:center;padding:4px 12px 0;background:radial-gradient(circle at 50% 42%,rgba(227,193,120,.10),transparent 62%);}
+  #rosary{height:clamp(96px,15vh,150px);width:auto;overflow:visible;}
+  .ros-chain,.ros-tail{fill:none;stroke:rgba(227,193,120,.30);stroke-width:1.1;}
+  .ros-bead{fill:rgba(255,255,255,.16);transition:fill .25s,transform .2s;transform-box:fill-box;transform-origin:center;}
+  .ros-bead.large{fill:rgba(227,193,120,.34);}
+  .ros-bead.done{fill:var(--gold-soft);}
+  .ros-bead.large.done{fill:var(--gold);}
+  .ros-bead.cur{fill:#fff;stroke:var(--gold);stroke-width:1.6;transform:scale(1.5);animation:rosGlow 1.7s ease-in-out infinite;}
+  .ros-bead.ros-sweep{fill:#fff;filter:drop-shadow(0 0 7px rgba(227,193,120,1));transform:scale(1.7);}
+  @keyframes rosGlow{0%,100%{filter:drop-shadow(0 0 2px rgba(227,193,120,.55));}50%{filter:drop-shadow(0 0 7px rgba(227,193,120,1));}}
+  .ros-medal{fill:rgba(227,193,120,.20);stroke:var(--gold-soft);stroke-width:1.1;transform-box:fill-box;transform-origin:center;}
+  .ros-medal.done{fill:var(--gold-soft);}
+  .ros-medal.cur{fill:#fff;stroke:var(--gold);animation:rosGlow 1.7s ease-in-out infinite;}
+  .ros-cross{fill:none;stroke:var(--gold);stroke-width:2.2;stroke-linecap:round;}
+  .ros-cross.cur{stroke:#fff;filter:drop-shadow(0 0 6px rgba(227,193,120,.95));}
+  @media (prefers-reduced-motion:reduce){ .ros-bead.cur,.ros-medal.cur{animation:none;} }
+
+  .stage{flex:1;display:flex;flex-direction:column;justify-content:flex-start;padding:10px 18px 6px;touch-action:pan-y;min-height:0;}
+  /* 단계 전환 슬라이드 애니메이션 (좌우 방향) */
+  .stage.anim-next{animation:slideNext .34s cubic-bezier(.22,.61,.36,1);}
+  .stage.anim-prev{animation:slidePrev .34s cubic-bezier(.22,.61,.36,1);}
+  @keyframes slideNext{from{opacity:.2;}to{opacity:1;}}
+  @keyframes slidePrev{from{opacity:.2;}to{opacity:1;}}
+  @media (prefers-reduced-motion:reduce){
+    .stage.anim-next,.stage.anim-prev{animation:none;}
+    .beads .b.cur{animation:none;}
+  }
+  .ptitle{text-align:center;font-family:'Nanum Myeongjo',serif;min-height:66px;display:flex;flex-direction:column;justify-content:center;align-items:center;flex:none;}
+  .ptitle .badge{display:inline-block;font-size:12px;color:var(--gold);background:rgba(227,193,120,.14);border:1px solid rgba(227,193,120,.22);padding:5px 14px;border-radius:20px;font-family:'Noto Sans KR';font-weight:600;letter-spacing:.06em;}
+  .ptitle h2{font-size:26px;font-weight:800;margin:13px 0 4px;letter-spacing:.02em;}
+  .ptitle .sub{font-size:14px;color:var(--gold-soft);font-family:'Noto Sans KR';display:block;min-height:19px;}
+  .ptitle .count{font-size:15px;color:var(--muted);margin-top:4px;font-family:'Noto Sans KR';font-weight:500;display:block;min-height:20px;}
+
+  .ptext{
+    margin:14px 0 0;background:linear-gradient(160deg,var(--card2),var(--card));
+    border:1px solid rgba(227,193,120,.16);border-radius:22px;padding:22px 22px;
+    font-family:'Nanum Myeongjo',serif;font-size:19px;line-height:1.95;text-align:center;
+    box-shadow:0 18px 44px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.05);
+    flex:1 1 auto;min-height:0;overflow:hidden;white-space:pre-line;letter-spacing:.01em;
+    display:flex;flex-direction:column;justify-content:center;align-items:center;
+  }
+  .ptext.center{text-align:center;}
+  .ptext .lead{color:var(--gold);font-weight:700;}
+  .ptext .reply{color:var(--text);}
+  .meditate{font-family:'Nanum Myeongjo',serif;font-size:17px;line-height:1.9;color:var(--muted);text-align:center;}
+  .meditate .bref{display:inline-block;font-family:'Noto Sans KR';font-size:13px;font-weight:600;color:var(--gold);background:rgba(227,193,120,.12);border:1px solid rgba(227,193,120,.25);border-radius:14px;padding:4px 12px;margin-bottom:12px;letter-spacing:.03em;}
+  .meditate .bmed{display:block;font-size:16px;line-height:1.85;color:var(--muted);}
+
+  /* controls */
+  .controls{padding:14px 18px calc(18px + var(--safe-bot));display:flex;flex-direction:column;gap:12px;}
+  .nav{display:flex;gap:12px;align-items:center;}
+  .nav .prev{flex:none;width:56px;}
+  .nav .next{flex:1;}
+  .nav button{border:none;border-radius:16px;padding:17px 8px;font-size:17px;font-weight:800;font-family:'Nanum Myeongjo',serif;cursor:pointer;}
+  .nav .prev button{width:100%;background:var(--card);border:1px solid var(--line);color:var(--text);font-size:20px;padding:17px 0;}
+  .nav .next button{width:100%;background:linear-gradient(135deg,var(--gold),#caa256);color:#2a2014;box-shadow:0 8px 22px rgba(227,193,120,.25);}
+  .nav .next button:active{transform:translateY(1px);}
+
+  .auto-row{display:flex;align-items:center;justify-content:center;gap:14px;font-size:13px;color:var(--muted);}
+  .auto-row .toggle{display:flex;align-items:center;gap:8px;cursor:pointer;}
+  .switch{width:42px;height:24px;border-radius:13px;background:rgba(255,255,255,.16);position:relative;transition:.2s;flex:none;}
+  .switch::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s;}
+  .switch.on{background:var(--gold);}
+  .switch.on::after{left:21px;}
+  .speed{display:flex;align-items:center;gap:6px;}
+  .speed button{background:var(--card);border:1px solid var(--line);color:var(--text);width:28px;height:28px;border-radius:8px;font-size:15px;cursor:pointer;font-family:inherit;}
+  .speed .val{min-width:46px;text-align:center;font-variant-numeric:tabular-nums;}
+
+  /* finish overlay */
+  #done{position:fixed;inset:0;background:rgba(15,13,32,.92);backdrop-filter:blur(6px);display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;z-index:50;}
+  #done.show{display:flex;}
+  #done .cross{font-size:46px;color:var(--gold);}
+  #done h2{font-family:'Nanum Myeongjo',serif;font-size:26px;margin:16px 0 8px;}
+  #done p{color:var(--muted);font-size:15px;line-height:1.7;max-width:330px;}
+  #done button{margin-top:26px;background:var(--gold);color:#2a2014;border:none;border-radius:16px;padding:15px 34px;font-size:16px;font-weight:800;font-family:'Nanum Myeongjo',serif;cursor:pointer;}
+
+  .stats{text-align:center;font-size:13px;color:var(--gold-soft);margin-top:14px;font-weight:600;letter-spacing:.02em;display:none;}
+  .done-stats{margin-top:16px;font-size:15px;color:var(--gold);font-weight:700;letter-spacing:.02em;min-height:20px;}
+  .hint{text-align:center;font-size:12px;color:var(--muted);opacity:.65;margin-top:2px;}
+  footer{text-align:center;font-size:11px;color:var(--muted);opacity:.5;padding:6px 0 calc(10px + var(--safe-bot));}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ HOME ============ -->
+  <div id="homeScreen">
+    <header>
+      <div class="cross serif">✝</div>
+      <h1>묵주기도</h1>
+      <div class="date" id="todayDate"></div>
+    </header>
+
+    <main id="home">
+      <div class="resume-bar" id="resumeBar">
+        <span id="resumeText">이어서 기도하기</span>
+        <button id="resumeBtn">계속</button>
+      </div>
+
+      <div class="today-card">
+        <div class="today-label">오늘의 신비</div>
+        <div class="myst-name serif"><span class="dot" id="todayDot"></span><span id="todayMystName"></span></div>
+        <div class="myst-when" id="todayWhen"></div>
+        <ul class="myst-list" id="todayList"></ul>
+      </div>
+
+      <div>
+        <div class="today-label" style="margin-bottom:8px;">신비 선택</div>
+        <div class="picker" id="picker"></div>
+      </div>
+
+      <div class="resume-bar" style="display:flex;background:transparent;border:none;padding:0;justify-content:center;">
+        <span class="hint">기도 중 화면을 좌우로 넘기거나 탭하여 진행합니다</span>
+      </div>
+
+      <button class="start-btn" id="startBtn">묵주기도 시작</button>
+      <div class="stats" id="homeStats"></div>
+    </main>
+    <footer>매일의 묵주기도 · 오 주님, 제 입술을 열어 주소서</footer>
+  </div>
+
+  <!-- ============ PRAYER ============ -->
+  <div id="pray">
+    <div class="topbar">
+      <button class="iconbtn" id="homeBtn" aria-label="처음으로">✕</button>
+      <div class="info">
+        <div class="m" id="barMyst"></div>
+        <div class="s" id="barStage"></div>
+      </div>
+      <button class="iconbtn" id="soundBtn" aria-label="소리" title="진동/소리">🔔</button>
+    </div>
+
+    <div class="decades" id="decades"></div>
+    <div class="rosary-wrap"><svg id="rosary" viewBox="0 0 200 285" aria-hidden="true"></svg></div>
+
+    <div class="stage" id="stage">
+      <div class="ptitle">
+        <span class="badge" id="pBadge"></span>
+        <h2 id="pTitle"></h2>
+        <div class="sub" id="pSub"></div>
+        <div class="count" id="pCount"></div>
+      </div>
+      <div class="ptext" id="pText"></div>
+    </div>
+
+    <div class="controls">
+      <div class="auto-row">
+        <span class="toggle" id="autoToggle"><span class="switch" id="autoSwitch"></span>자동 진행</span>
+        <span class="speed">
+          <button id="spdDown">−</button>
+          <span class="val"><span id="spdVal">6</span>초</span>
+          <button id="spdUp">+</button>
+        </span>
+      </div>
+      <div class="nav">
+        <span class="prev"><button id="prevBtn">‹</button></span>
+        <span class="next"><button id="nextBtn">다음</button></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ DONE ============ -->
+  <div id="done">
+    <div class="cross serif">✝</div>
+    <h2 class="serif">묵주기도를 마쳤습니다</h2>
+    <p>주님의 약속을 받기에 합당한 사람이 되게 하소서.<br>오늘 바친 기도가 위로와 평화가 되기를 바랍니다.</p>
+    <div class="done-stats" id="doneStats"></div>
+    <button id="doneBtn">처음으로</button>
+  </div>
+
+</div>
+
+<script>
+/* ================= 기도문 ================= */
+const P = {
+  십자가입맞춤: `묵주 끝의 십자가를 두 손으로 잡고
+경건히 입맞춥니다.
+
+그리고 성호를 그으며
+묵주기도를 시작합니다.`,
+
+  성호경: `† 성부와 성자와 성령의 이름으로. 아멘.`,
+
+  사도신경: `전능하신 천주 성부 천지의 창조주를 저는 믿나이다.
+그 외아들 우리 주 예수 그리스도님,
+성령으로 인하여 동정 마리아께 잉태되어 나시고,
+본시오 빌라도 통치 아래서 고난을 받으시고 십자가에 못 박혀 돌아가시고 묻히셨으며,
+저승에 가시어 사흗날에 죽은 이들 가운데서 부활하시고,
+하늘에 올라 전능하신 천주 성부 오른편에 앉으시며,
+그리로부터 산 이와 죽은 이를 심판하러 오시리라 믿나이다.
+성령을 믿으며, 거룩하고 보편된 교회와 모든 성인의 통공을 믿으며,
+죄의 용서와 육신의 부활을 믿으며, 영원한 삶을 믿나이다. 아멘.`,
+
+  주님의기도: `하늘에 계신 우리 아버지,
+아버지의 이름이 거룩히 빛나시며,
+아버지의 나라가 오시며,
+아버지의 뜻이 하늘에서와 같이 땅에서도 이루어지소서.
+오늘 저희에게 일용할 양식을 주시고,
+저희에게 잘못한 이를 저희가 용서하오니
+저희 죄를 용서하시고,
+저희를 유혹에 빠지지 않게 하시고
+악에서 구하소서. 아멘.`,
+
+  성모송: `은총이 가득하신 마리아님, 기뻐하소서!
+주님께서 함께 계시니
+여인 중에 복되시며
+태중의 아들 예수님 또한 복되시나이다.
+천주의 성모 마리아님,
+이제와 저희 죽을 때에
+저희 죄인을 위하여 빌어 주소서. 아멘.`,
+
+  영광송: `영광이 성부와 성자와 성령께,
+처음과 같이 이제와 항상 영원히. 아멘.`,
+
+  구원송: `예수님, 저희 죄를 용서하시며,
+저희를 지옥 불에서 구하시고,
+연옥 영혼을 돌보시며,
+가장 버림받은 영혼을 돌보소서.`,
+
+  마침성모송: `○ 모후이시며 사랑이 넘친 어머니,
+우리의 생명, 기쁨, 희망이시여,
+● 당신 우러러 하와의 그 자손들이
+눈물을 흘리며 부르짖나이다,
+슬픔의 골짜기에서.
+○ 우리들의 보호자 성모님,
+불쌍한 저희를
+인자로운 눈으로 굽어보소서.
+● 귀양살이 끝날 때에
+당신의 아들 우리 주 예수님 뵙게 하소서.
+너그러우시고 자애로우시며
+오! 아름다우신 동정 마리아님.
+○ 천주의 성모님, 저희를 위하여 빌어 주시어
+● 그리스도께서 약속하신 영원한 생명을 얻게 하소서.`,
+
+  마침기도: `† 기도합시다.
+하느님,
+외아드님께서 삶과 죽음과 부활로
+저희에게 영원한 구원을 마련해 주셨나이다.
+복되신 동정 마리아와 함께 이 신비를 묵상하며
+묵주 기도를 바치오니
+저희가 그 가르침을 따라
+영원한 생명을 얻게 하소서.
+우리 주 그리스도를 통하여 비나이다.
+◎ 아멘.`
+};
+
+/* ================= 신비 ================= */
+const MYST = {
+  joy:{ key:'joy', name:'환희의 신비', color:'var(--joy)', when:'월요일 · 토요일', items:[
+    '마리아께서 예수님을 잉태하심',
+    '마리아께서 엘리사벳을 찾아보심',
+    '마리아께서 예수님을 낳으심',
+    '마리아께서 예수님을 성전에 바치심',
+    '마리아께서 잃으셨던 예수님을 성전에서 찾으심'
+  ]},
+  light:{ key:'light', name:'빛의 신비', color:'var(--light)', when:'목요일', items:[
+    '예수님께서 세례받으심',
+    '예수님께서 카나에서 첫 기적을 행하심',
+    '예수님께서 하느님 나라를 선포하심',
+    '예수님께서 거룩하게 변모하심',
+    '예수님께서 성체성사를 세우심'
+  ]},
+  sorrow:{ key:'sorrow', name:'고통의 신비', color:'var(--sorrow)', when:'화요일 · 금요일', items:[
+    '예수님께서 우리를 위하여 피땀 흘리심',
+    '예수님께서 우리를 위하여 매맞으심',
+    '예수님께서 우리를 위하여 가시관 쓰심',
+    '예수님께서 우리를 위하여 십자가 지심',
+    '예수님께서 우리를 위하여 십자가에 못 박혀 돌아가심'
+  ]},
+  glory:{ key:'glory', name:'영광의 신비', color:'var(--glory)', when:'수요일 · 일요일', items:[
+    '예수님께서 부활하심',
+    '예수님께서 승천하심',
+    '예수님께서 성령을 보내심',
+    '예수님께서 마리아를 하늘에 불러올리심',
+    '예수님께서 마리아께 천상 모후의 관을 씌우심'
+  ]}
+};
+// 신비별 성경 출처 + 짧은 묵상
+const BIBLE = {
+  joy:[
+    {ref:'루카 1,26-38', med:'천사의 말씀에 순종하여 하느님의 어머니가 되심을 묵상합니다.'},
+    {ref:'루카 1,39-56', med:'엘리사벳을 찾아 기쁨으로 마니피캇을 노래하심을 묵상합니다.'},
+    {ref:'루카 2,1-20', med:'가난한 말구유에 오신 구세주의 겸손을 묵상합니다.'},
+    {ref:'루카 2,22-40', med:'성전에서 아드님을 하느님께 봉헌하신 마음을 묵상합니다.'},
+    {ref:'루카 2,41-52', med:'사흘 만에 성전에서 예수님을 다시 찾으신 기쁨을 묵상합니다.'}
+  ],
+  light:[
+    {ref:'마태 3,13-17', med:'요르단 강에서 세례 받으시고 성령이 내리심을 묵상합니다.'},
+    {ref:'요한 2,1-11', med:'어머니의 청을 들어 카나에서 첫 표징을 베푸심을 묵상합니다.'},
+    {ref:'마르 1,14-15', med:'회개하고 복음을 믿으라는 하느님 나라의 선포를 묵상합니다.'},
+    {ref:'마태 17,1-8', med:'타볼 산에서 영광스럽게 변모하심을 묵상합니다.'},
+    {ref:'루카 22,14-20', med:'당신 몸과 피를 성체성사로 내어주심을 묵상합니다.'}
+  ],
+  sorrow:[
+    {ref:'루카 22,39-46', med:'겟세마니에서 "아버지 뜻대로 하소서" 기도하심을 묵상합니다.'},
+    {ref:'요한 19,1', med:'우리 죄를 위하여 매 맞으심을 묵상합니다.'},
+    {ref:'마태 27,27-31', med:'가시관을 쓰시고 조롱당하심을 묵상합니다.'},
+    {ref:'요한 19,16-17', med:'무거운 십자가를 지고 골고타로 오르심을 묵상합니다.'},
+    {ref:'루카 23,33-46', med:'십자가 위에서 우리를 위해 목숨을 바치심을 묵상합니다.'}
+  ],
+  glory:[
+    {ref:'마태 28,1-10', med:'죽음을 이기고 부활하신 주님을 묵상합니다.'},
+    {ref:'사도 1,6-11', med:'제자들을 축복하시며 하늘로 오르심을 묵상합니다.'},
+    {ref:'사도 2,1-13', med:'사도들에게 성령께서 내리심을 묵상합니다.'},
+    {ref:'루카 1,46-55', med:'하늘로 들어 올림 받으신 성모님을 묵상합니다.'},
+    {ref:'묵시 12,1', med:'하늘의 모후로 관을 쓰신 성모님을 묵상합니다.'}
+  ]
+};
+// 요일별 기본 신비: 0=일 ... 6=토
+const BY_DAY = ['glory','joy','sorrow','glory','light','sorrow','joy'];
+const DAYNAMES = ['일','월','화','수','목','금','토'];
+
+/* ================= 상태 ================= */
+const LS_KEY = 'rosary_progress_v1';
+let mode = 'joy';          // 선택된 신비
+let steps = [];            // 단계 배열
+let idx = 0;               // 현재 단계
+let autoOn = false;
+let autoSec = 6;
+let autoTimer = null;
+let navDir = 1;            // 1=다음, -1=이전 (전환 애니메이션 방향)
+
+/* ===== 단계 생성 ===== */
+function buildSteps(m){
+  const mset = MYST[m];
+  const s = [];
+  // 시작 기도 (ros = 묵주알 위치: 0=십자가, 1=시작큰알, 2~4=시작작은알, 5=메달)
+  s.push({kind:'십자가', badge:'시작', title:'십자가에 입맞춤', sub:'묵주를 손에 잡고', text:P.십자가입맞춤, center:true, ros:0});
+  s.push({kind:'성호경', badge:'시작', title:'성호경', text:P.성호경, center:true, ros:0});
+  s.push({kind:'사도신경', badge:'시작', title:'사도신경', text:P.사도신경, ros:0});
+  s.push({kind:'주님의기도', badge:'시작', title:'주님의 기도', text:P.주님의기도, ros:1});
+  s.push({kind:'성모송', badge:'시작', title:'성모송', sub:'믿음을 청하며', text:P.성모송, ros:2});
+  s.push({kind:'성모송', badge:'시작', title:'성모송', sub:'희망을 청하며', text:P.성모송, ros:3});
+  s.push({kind:'성모송', badge:'시작', title:'성모송', sub:'사랑을 청하며', text:P.성모송, ros:4});
+  s.push({kind:'영광송', badge:'시작', title:'영광송', text:P.영광송, center:true, ros:5});
+  // 5단 (각 단: base=그 단 큰알, base+1~10=작은알 10)
+  for(let d=0; d<5; d++){
+    const base = 6 + d*11;
+    const bib = (BIBLE[m]||[])[d] || {};
+    s.push({kind:'신비', decade:d, badge:`제 ${d+1} 단`, title:`${['첫째','둘째','셋째','넷째','다섯째'][d]} 신비`,
+            mystText:mset.items[d], bibleRef:bib.ref, bibleMed:bib.med, meditate:true, ros:base});
+    s.push({kind:'주님의기도', decade:d, badge:`제 ${d+1} 단`, title:'주님의 기도', text:P.주님의기도, ros:base});
+    for(let b=1; b<=10; b++){
+      s.push({kind:'성모송', decade:d, bead:b, badge:`제 ${d+1} 단`, title:'성모송', count:`${b} / 10`, text:P.성모송, ros:base+b});
+    }
+    s.push({kind:'영광송', decade:d, badge:`제 ${d+1} 단`, title:'영광송', text:P.영광송, center:true, ros:base+10});
+    s.push({kind:'구원송', decade:d, badge:`제 ${d+1} 단`, title:'구원송 (파티마 기도)', text:P.구원송, center:true, ros:base+10});
+  }
+  // 마침 기도 (999=메달로 돌아옴, 1000=십자가)
+  s.push({kind:'마침성모송', badge:'마침', title:'성모 찬송', text:P.마침성모송, ros:999});
+  s.push({kind:'마침기도', badge:'마침', title:'마침 기도', text:P.마침기도, ros:999});
+  s.push({kind:'성호경', badge:'마침', title:'성호경', text:P.성호경, center:true, ros:1000});
+  return s;
+}
+
+/* ================= DOM ================= */
+const $ = id => document.getElementById(id);
+const homeScreen = $('homeScreen'), prayScreen = $('pray');
+
+/* ===== 홈 렌더 ===== */
+function renderHome(){
+  const now = new Date();
+  const dow = now.getDay();
+  $('todayDate').textContent =
+    `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 (${DAYNAMES[dow]})`;
+  // 기본 신비 = 오늘 요일
+  mode = BY_DAY[dow];
+  paintToday();
+  renderPicker();
+  checkResume();
+  const sx=streakText(); const se=$('homeStats');
+  se.textContent=sx; se.style.display=sx?'block':'none';
+}
+function paintToday(){
+  const m = MYST[mode];
+  $('todayDot').style.background = m.color;
+  $('todayMystName').textContent = m.name;
+  $('todayWhen').textContent = m.when;
+  const ul = $('todayList'); ul.innerHTML='';
+  m.items.forEach((it,i)=>{
+    const li=document.createElement('li');
+    li.innerHTML=`<span class="num">${i+1}</span><span>${it}</span>`;
+    ul.appendChild(li);
+  });
+}
+function renderPicker(){
+  const p=$('picker'); p.innerHTML='';
+  Object.values(MYST).forEach(m=>{
+    const b=document.createElement('button');
+    if(m.key===mode) b.classList.add('active');
+    b.innerHTML=`<span class="sw" style="background:${m.color}"></span>${m.name.replace('의 신비','')}<small>${m.when}</small>`;
+    b.onclick=()=>{ mode=m.key; paintToday(); renderPicker(); };
+    p.appendChild(b);
+  });
+}
+
+/* ===== 진행 저장/복원 ===== */
+function save(){
+  localStorage.setItem(LS_KEY, JSON.stringify({mode, idx, ts:Date.now()}));
+}
+function clearSave(){ localStorage.removeItem(LS_KEY); }
+
+/* ===== 기도 기록 · 연속일수 ===== */
+const LOG_KEY = 'rosary_log_v1';
+function dayKey(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function getLog(){ try{ return JSON.parse(localStorage.getItem(LOG_KEY)) || {dates:[],total:0}; }catch(e){ return {dates:[],total:0}; } }
+function recordDone(){
+  const log=getLog(); const t=dayKey(new Date());
+  log.total=(log.total||0)+1;
+  if(!log.dates.includes(t)) log.dates.push(t);
+  localStorage.setItem(LOG_KEY, JSON.stringify(log));
+}
+function calcStreak(dates){
+  const set=new Set(dates); let n=0; const d=new Date();
+  if(!set.has(dayKey(d))) d.setDate(d.getDate()-1);   // 오늘 안 했으면 어제부터
+  while(set.has(dayKey(d))){ n++; d.setDate(d.getDate()-1); }
+  return n;
+}
+function streakText(){
+  const log=getLog(); if(!log.total) return '';
+  const mon=dayKey(new Date()).slice(0,7);
+  const monDays=(log.dates||[]).filter(x=>x.slice(0,7)===mon).length;
+  return `🔥 연속 ${calcStreak(log.dates||[])}일 · 이번 달 ${monDays}일 · 누적 ${log.total}회`;
+}
+function checkResume(){
+  const raw = localStorage.getItem(LS_KEY);
+  const bar = $('resumeBar');
+  if(!raw){ bar.classList.remove('show'); return; }
+  try{
+    const d = JSON.parse(raw);
+    // 같은 날 + 마지막 단계 전까지만 이어서
+    const same = new Date(d.ts).toDateString() === new Date().toDateString();
+    const total = buildSteps(d.mode).length;
+    if(same && d.idx>0 && d.idx<total-1){
+      $('resumeText').textContent = `이어서 기도 · ${MYST[d.mode].name}`;
+      bar.classList.add('show');
+      $('resumeBtn').onclick=()=>{ startPray(d.mode, d.idx); };
+    }else{ clearSave(); bar.classList.remove('show'); }
+  }catch(e){ bar.classList.remove('show'); }
+}
+
+/* ===== 기도 시작 ===== */
+function startPray(m, at){
+  mode = m || mode;
+  steps = buildSteps(mode);
+  idx = at || 0;
+  homeScreen.style.display='none';
+  prayScreen.classList.add('show');
+  buildDecadeBar();
+  buildRosary();
+  navDir=1; renderStep();
+  reqWake();
+  window.scrollTo(0,0);
+}
+function goHome(){
+  stopAuto(); relWake();
+  prayScreen.classList.remove('show');
+  homeScreen.style.display='';
+  renderHome();
+}
+
+/* ===== 십자(단) 진행바 ===== */
+function buildDecadeBar(){
+  $('decades').innerHTML = '<div class="d"><span></span></div>';
+}
+function updateDecadeBar(){
+  const sp=$('decades').querySelector('span'); if(!sp) return;
+  const p = steps.length>1 ? idx/(steps.length-1) : 0;   // 전체 진행도(0~1), 한 방향
+  sp.style.width = (p*100).toFixed(1)+'%';
+}
+
+/* ===== 묵주알 ===== */
+function renderBeads(){
+  const c=$('beads');
+  const st=steps[idx];
+  if(st.decade===undefined || st.kind==='신비'){ c.innerHTML=''; c.style.minHeight='0'; return; }
+  c.style.minHeight='30px';
+  if(c.children.length!==10){
+    c.innerHTML='';
+    for(let i=0;i<10;i++){ const b=document.createElement('div'); b.className='b'; c.appendChild(b); }
+  }
+  const cur = st.bead||0;   // 현재 묵주알 (1~10), 0이면 단 시작 전
+  [...c.children].forEach((el,i)=>{
+    if(cur>0 && i < cur-1)      el.className='b done';
+    else if(cur>0 && i===cur-1) el.className='b cur';
+    else                         el.className='b';
+  });
+}
+
+/* ===== 시각적 묵주 ===== */
+let rosEls=[];
+function rosCircle(svg,x,y,r,cls,order){
+  const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  c.setAttribute('cx',x.toFixed(2)); c.setAttribute('cy',y.toFixed(2)); c.setAttribute('r',r);
+  c.setAttribute('class',cls);
+  svg.appendChild(c);
+  if(order!==undefined) rosEls.push({order, el:c});
+  return c;
+}
+function buildRosary(){
+  const NS='http://www.w3.org/2000/svg';
+  const svg=$('rosary'); if(!svg) return;
+  svg.innerHTML=''; rosEls=[];
+  const cx=100, cy=98, R=82, gap=48, span=360-gap, start=90+gap/2;
+  // 고리(체인)
+  const ring=document.createElementNS(NS,'circle');
+  ring.setAttribute('cx',cx); ring.setAttribute('cy',cy); ring.setAttribute('r',R);
+  ring.setAttribute('class','ros-chain'); svg.appendChild(ring);
+  // 5단 × (주님의기도 큰알 1 + 성모송 작은알 10) = 55알
+  for(let i=0;i<55;i++){
+    const d=Math.floor(i/11), pos=i%11, big=(pos===0);
+    const ang=(start + (i+0.5)/55*span)*Math.PI/180;
+    rosCircle(svg, cx+R*Math.cos(ang), cy+R*Math.sin(ang), big?5.4:3.5,
+              'ros-bead'+(big?' large':''), 6+d*11+pos);
+  }
+  // 가운데 메달 + 꼬리(시작기도) + 십자가
+  const my=cy+R;
+  const tail=document.createElementNS(NS,'line');
+  tail.setAttribute('x1',cx); tail.setAttribute('y1',my); tail.setAttribute('x2',cx); tail.setAttribute('y2',my+62);
+  tail.setAttribute('class','ros-tail'); svg.appendChild(tail);
+  rosCircle(svg,cx,my,6,'ros-medal',5);        // 메달(영광송)
+  rosCircle(svg,cx,my+18,5.2,'ros-bead large',1); // 시작 주님의기도
+  rosCircle(svg,cx,my+31,3.5,'ros-bead',2);    // 시작 성모송 3
+  rosCircle(svg,cx,my+42,3.5,'ros-bead',3);
+  rosCircle(svg,cx,my+53,3.5,'ros-bead',4);
+  const cross=document.createElementNS(NS,'path');
+  const c0=my+62;
+  cross.setAttribute('d',`M${cx},${c0} L${cx},${c0+22} M${cx-7},${c0+8} L${cx+7},${c0+8}`);
+  cross.setAttribute('class','ros-cross'); svg.appendChild(cross);
+  rosEls.push({order:0, el:cross});
+  // 묵주알 클릭 → 해당 위치로 이동
+  rosEls.forEach(({order,el})=>{
+    el.style.cursor='pointer';
+    el.addEventListener('click', ev=>{ ev.stopPropagation(); goToRos(order); });
+  });
+}
+function goToRos(order){
+  const t = steps.findIndex(s=>s.ros===order);
+  if(t<0) return;
+  navDir = t>=idx ? 1 : -1;
+  idx = t; renderStep(); buzz();
+}
+function stepOrder(st){ return st.ros; }
+function updateRosary(){
+  if(!rosEls.length) return;
+  const co=stepOrder(steps[idx],idx);
+  const curOrder = co>=1000?0 : (co>=999?5 : co);
+  rosEls.forEach(({order,el})=>{
+    el.classList.remove('done','cur');
+    if(order===curOrder) el.classList.add('cur');
+    else if(order<co) el.classList.add('done');
+  });
+}
+
+/* ===== 단 마침 — 그 단(10알)을 끝→처음으로 되짚어 훑기 ===== */
+let sweepTimers=[];
+function clearSweep(){
+  sweepTimers.forEach(clearTimeout); sweepTimers=[];
+  rosEls.forEach(({el})=>el.classList.remove('ros-sweep'));
+}
+function sweepDecade(d){
+  clearSweep();
+  const base=6+d*11;
+  for(let k=0;k<10;k++){
+    const order=base+10-k;                       // 10 → 1 (끝에서 처음으로)
+    sweepTimers.push(setTimeout(()=>{
+      const e=rosEls.find(x=>x.order===order);
+      if(e){ e.el.classList.add('ros-sweep'); setTimeout(()=>e.el.classList.remove('ros-sweep'),240); }
+    }, k*75));
+  }
+}
+
+/* ===== 단계 렌더 ===== */
+function renderStep(){
+  const st=steps[idx];
+  const m=MYST[mode];
+  $('barMyst').textContent = m.name;
+  $('barStage').textContent = st.title + (st.count? ` · ${st.count}`:'');
+  $('pBadge').textContent = st.badge;
+  $('pBadge').style.color = m.color;
+  $('pBadge').style.background = 'rgba(255,255,255,.08)';
+
+  if(st.kind==='신비'){
+    $('pTitle').textContent = st.title;
+    $('pSub').textContent = '';
+    $('pCount').textContent = '';
+    const t=$('pText');
+    t.className='ptext center';
+    t.innerHTML = `<div class="meditate">`+
+      `<span class="lead serif" style="font-size:22px;display:block;margin-bottom:10px;color:${m.color}">${st.mystText}</span>`+
+      (st.bibleRef?`<span class="bref">${st.bibleRef}</span>`:'')+
+      `<span class="bmed">${st.bibleMed||'이 신비를 묵상하며 기도를 바칩니다.'}</span>`+
+      `</div>`;
+  }else{
+    $('pTitle').textContent = st.title;
+    $('pSub').textContent = st.sub||'';
+    $('pCount').textContent = st.count?`성모송 ${st.count}`:'';
+    const t=$('pText');
+    t.className='ptext'+(st.center?' center':'');
+    t.textContent = st.text;
+    t.scrollTop=0;
+  }
+  requestAnimationFrame(fitText);
+  updateRosary();
+  if(navDir>0 && st.kind==='영광송' && st.decade!==undefined) sweepDecade(st.decade); else clearSweep();
+  updateDecadeBar();
+  $('nextBtn').textContent = (idx>=steps.length-1)?'마침':'다음';
+  $('prevBtn').disabled = idx===0;
+  $('prevBtn').style.opacity = idx===0?'.4':'1';
+  animateStage();
+  save();
+  if(autoOn) scheduleAuto();
+}
+
+/* ===== 기도문 자동 맞춤 (한 화면에 들어오도록 글자 크기 조절) ===== */
+function fitText(){
+  const t=$('pText'); if(!t || t.clientHeight<40) return;   // 레이아웃 준비 전이면 건너뜀
+  let size=20;                                  // 기본 글자 크기(px)
+  t.style.fontSize=size+'px';
+  let guard=0;
+  while(t.scrollHeight > t.clientHeight+1 && size>9 && guard<60){
+    size-=0.5; t.style.fontSize=size+'px'; guard++;   // 긴 기도문은 더 작게 줄여 한 화면에
+  }
+}
+window.addEventListener('resize', ()=>{ if(prayScreen.classList.contains('show')) fitText(); });
+
+/* ===== 전환 애니메이션 (방향별 슬라이드) ===== */
+function animateStage(){
+  const s=$('stage');
+  s.classList.remove('anim-next','anim-prev');
+  void s.offsetWidth;                       // 리플로우로 애니메이션 재시작
+  s.classList.add(navDir<0 ? 'anim-prev' : 'anim-next');
+}
+
+/* ===== 이동 ===== */
+function next(){
+  if(idx>=steps.length-1){ finish(); return; }
+  navDir=1; idx++; renderStep(); buzz();
+}
+function prev(){ if(idx>0){ navDir=-1; idx--; renderStep(); } }
+function finish(){
+  stopAuto(); clearSave(); relWake();
+  recordDone();
+  $('doneStats').textContent = streakText();
+  $('done').classList.add('show');
+}
+
+/* ===== 자동 진행 ===== */
+function scheduleAuto(){
+  clearTimeout(autoTimer);
+  autoTimer=setTimeout(()=>{
+    if(idx>=steps.length-1){ finish(); return; }
+    next();
+  }, autoSec*1000);
+}
+function stopAuto(){ autoOn=false; clearTimeout(autoTimer); $('autoSwitch').classList.remove('on'); }
+function toggleAuto(){
+  autoOn=!autoOn;
+  $('autoSwitch').classList.toggle('on',autoOn);
+  if(autoOn) scheduleAuto(); else clearTimeout(autoTimer);
+}
+
+/* ===== 진동(소리 대체) ===== */
+let buzzOn=true;
+function buzz(){ if(buzzOn && navigator.vibrate) navigator.vibrate(12); }
+
+/* ===== 화면 켜짐 유지 (기도 중 잠금 방지) ===== */
+let wakeLock=null;
+async function reqWake(){ try{ if('wakeLock' in navigator) wakeLock=await navigator.wakeLock.request('screen'); }catch(e){} }
+function relWake(){ try{ if(wakeLock){ wakeLock.release(); wakeLock=null; } }catch(e){} }
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState==='visible' && prayScreen.classList.contains('show')) reqWake();
+});
+
+/* ================= 이벤트 ================= */
+$('startBtn').onclick=()=>{ clearSave(); startPray(mode,0); };
+$('homeBtn').onclick=goHome;
+$('doneBtn').onclick=()=>{ $('done').classList.remove('show'); goHome(); };
+$('nextBtn').onclick=next;
+$('prevBtn').onclick=prev;
+$('autoToggle').onclick=toggleAuto;
+$('spdUp').onclick=()=>{ autoSec=Math.min(30,autoSec+1); $('spdVal').textContent=autoSec; if(autoOn)scheduleAuto(); };
+$('spdDown').onclick=()=>{ autoSec=Math.max(2,autoSec-1); $('spdVal').textContent=autoSec; if(autoOn)scheduleAuto(); };
+$('soundBtn').onclick=function(){ buzzOn=!buzzOn; this.textContent=buzzOn?'🔔':'🔕'; };
+
+// 화면(기도문 영역) 탭으로 다음 진행
+let suppressTap=false;
+$('stage').addEventListener('click', (e)=>{
+  if(suppressTap){ suppressTap=false; return; }   // 스와이프 직후 탭 중복 방지
+  next();
+});
+
+/* ===== 좌우 스와이프로 진행 (휴대폰) ===== */
+let tsx=0, tsy=0, tst=0, tracking=false;
+prayScreen.addEventListener('touchstart', e=>{
+  const t=e.touches[0]; tsx=t.clientX; tsy=t.clientY; tst=Date.now(); tracking=true;
+}, {passive:true});
+prayScreen.addEventListener('touchend', e=>{
+  if(!tracking) return; tracking=false;
+  const t=e.changedTouches[0];
+  const dx=t.clientX-tsx, dy=t.clientY-tsy, dt=Date.now()-tst;
+  // 가로 이동이 충분하고, 세로(스크롤)보다 우세할 때만 진행으로 인식
+  if(dt<700 && Math.abs(dx)>55 && Math.abs(dx)>Math.abs(dy)*1.4){
+    suppressTap=true;                 // 뒤따르는 click 무시
+    setTimeout(()=>{ suppressTap=false; }, 450);
+    if(dx<0) next(); else prev();
+  }
+}, {passive:true});
+
+// 키보드
+document.addEventListener('keydown',e=>{
+  if(!prayScreen.classList.contains('show'))return;
+  if(e.key==='ArrowRight'||e.key===' '){ e.preventDefault(); next(); }
+  if(e.key==='ArrowLeft'){ prev(); }
+  if(e.key==='Escape'){ goHome(); }
+});
+
+/* ===== 초기화 ===== */
+renderHome();
+
+/* ===== 서비스워커 ===== */
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
